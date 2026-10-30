@@ -1,0 +1,45 @@
+name: Build MAHIM AI SIGNAL PRO
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: 8.9
+
+      - name: Fix Android project structure
+        run: |
+          mkdir -p app/src/main/java/com/mahim/aisignalpro
+          mkdir -p app/src/main
+          mv AndroidManifest.xml app/src/main/AndroidManifest.xml
+          mv MainActivity.kt app/src/main/java/com/mahim/aisignalpro/
+          mv FloatingOverlayService.kt app/src/main/java/com/mahim/aisignalpro/
+          mv ScreenCaptureService.kt app/src/main/java/com/mahim/aisignalpro/
+          mv SignalResult.kt app/src/main/java/com/mahim/aisignalpro/
+          mv "build.gradle (1).kts" app/build.gradle.kts
+
+      - name: Build APK
+        run: gradle assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: MAHIM-AI-SIGNAL-PRO-APK
+          path: app/build/outputs/apk/debug/app-debug.apk
